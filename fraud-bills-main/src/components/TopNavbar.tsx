@@ -156,102 +156,97 @@ export default function TopNavbar({ onMenuToggle }: { onMenuToggle?: () => void 
   if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/80 backdrop-blur-md px-4 md:px-6 shadow-sm safe-pt">
-      {/* Left Section: Greeting & Time */}
-      <div className="flex items-center gap-3 md:gap-6">
-        {onMenuToggle && (
-          <button
-            onClick={onMenuToggle}
-            className="p-2 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 md:hidden transition-colors"
-            aria-label="Open navigation menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-        )}
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-slate-900">
-              Welcome back, {user.name.split(" ")[0]}
-            </h2>
-            
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 mt-0.5">
-            <ClockIcon className="h-3 w-3 text-indigo-500" />
-            {format(currentTime, "EEEE, dd MMMM • HH:mm:ss")}
-          </div>
-        </div>
-      </div>
+    <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur-md shadow-sm">
+      {/* Safe area top spacer for mobile */}
+      <div className="h-[env(safe-area-inset-top,0px)] w-full bg-transparent" />
 
-      {/* Right Section: Controls & Profile */}
-      <div className="flex items-center gap-4">
-        {isFinanceUser && (
-          <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/50 px-3 py-1.5 transition-all">
-            <span className="text-xs font-semibold text-slate-600">Auto Approval</span>
-            <Switch
-              checked={autoApprovalEnabled}
-              onCheckedChange={handleAutoApprovalToggle}
-              disabled={isAutoApprovalLoading || isAutoApprovalSaving}
-              aria-label="Toggle auto approval"
-              className="data-[state=checked]:bg-indigo-600"
-            />
-          </div>
-        )}
-
-        <div className="flex items-center border-l border-slate-100 ml-1 pl-4">
-          <button
-            className="relative p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-            onClick={handleBellClick}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-white">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* User Account Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 p-1 pl-3 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all outline-none group">
-              <div className="flex flex-col items-end hidden md:flex">
-                <p className="text-xs font-bold text-slate-900 leading-none">{user.name}</p>
-                <span className="text-[10px] font-medium text-slate-400 mt-1">{roleLabel}</span>
-              </div>
-              <div className="relative">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white shadow-lg shadow-indigo-100 transition-transform group-active:scale-95">
-                  {user.name.charAt(0)}
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-              </div>
-              <ChevronDown className="h-4 w-4 text-slate-300 mr-1 hidden md:block group-hover:text-indigo-500 transition-colors" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60 p-2 rounded-2xl shadow-2xl border-slate-100 mt-2">
-            <DropdownMenuLabel className="px-2 py-2 mb-1">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account ID</p>
-              <p className="text-xs font-mono font-medium text-slate-600">ID: {user.id}</p>
-            </DropdownMenuLabel>
-            {/* <DropdownMenuSeparator className="bg-slate-50" />
-            <DropdownMenuItem className="rounded-lg cursor-pointer gap-3 focus:bg-indigo-50 focus:text-indigo-600 py-2.5 font-medium text-slate-600">
-              <User className="h-4 w-4" />
-              <span>Profile Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="rounded-lg cursor-pointer gap-3 focus:bg-indigo-50 focus:text-indigo-600 py-2.5 font-medium text-slate-600">
-              <Settings className="h-4 w-4" />
-              <span>Security Hub</span>
-            </DropdownMenuItem> */}
-            <DropdownMenuSeparator className="bg-slate-50" />
-            <DropdownMenuItem 
-              className="rounded-lg cursor-pointer gap-3 text-rose-600 focus:bg-rose-50 focus:text-rose-600 py-2.5 font-bold"
-              onClick={() => logout?.()}
+      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Left Section: Greeting & Time */}
+        <div className="flex items-center gap-3 md:gap-6">
+          {onMenuToggle && (
+            <button
+              onClick={onMenuToggle}
+              className="p-2 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 md:hidden transition-colors"
+              aria-label="Open navigation menu"
             >
-              <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900">
+                Welcome back, {user.name.split(" ")[0]}
+              </h2>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 mt-0.5">
+              <ClockIcon className="h-3 w-3 text-indigo-500" />
+              {format(currentTime, "EEEE, dd MMMM • HH:mm:ss")}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Section: Controls & Profile */}
+        <div className="flex items-center gap-4">
+          {isFinanceUser && (
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/50 px-3 py-1.5 transition-all hidden sm:flex">
+              <span className="text-xs font-semibold text-slate-600">Auto Approval</span>
+              <Switch
+                checked={autoApprovalEnabled}
+                onCheckedChange={handleAutoApprovalToggle}
+                disabled={isAutoApprovalLoading || isAutoApprovalSaving}
+                aria-label="Toggle auto approval"
+                className="data-[state=checked]:bg-indigo-600"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center border-l border-slate-100 ml-1 pl-4">
+            <button
+              className="relative p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+              onClick={handleBellClick}
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* User Account Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-3 p-1 pl-3 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all outline-none group">
+                <div className="flex flex-col items-end hidden md:flex">
+                  <p className="text-xs font-bold text-slate-900 leading-none">{user.name}</p>
+                  <span className="text-[10px] font-medium text-slate-400 mt-1">{roleLabel}</span>
+                </div>
+                <div className="relative">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white shadow-lg shadow-indigo-100 transition-transform group-active:scale-95">
+                    {user.name.charAt(0)}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+                </div>
+                <ChevronDown className="h-4 w-4 text-slate-300 mr-1 hidden md:block group-hover:text-indigo-500 transition-colors" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60 p-2 rounded-2xl shadow-2xl border-slate-100 mt-2">
+              <DropdownMenuLabel className="px-2 py-2 mb-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account ID</p>
+                <p className="text-xs font-mono font-medium text-slate-600">ID: {user.id}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-slate-50" />
+              <DropdownMenuItem
+                className="rounded-lg cursor-pointer gap-3 text-rose-600 focus:bg-rose-50 focus:text-rose-600 py-2.5 font-bold"
+                onClick={() => logout?.()}
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

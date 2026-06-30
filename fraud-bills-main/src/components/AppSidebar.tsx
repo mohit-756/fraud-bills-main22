@@ -185,7 +185,8 @@ export default function AppSidebar({ collapsed, onToggle, isMobile }: AppSidebar
     <aside
       className={cn(
         "sidebar-gradient flex flex-col h-screen sticky top-0 transition-all duration-300 z-30",
-        collapsed ? "w-16" : "w-60"
+        collapsed ? "w-16" : "w-60",
+        isMobile && "safe-pt safe-pb"
       )}
     >
       {/* Logo */}

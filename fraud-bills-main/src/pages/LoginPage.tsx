@@ -357,110 +357,118 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      {/* subtle dot grid */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-40"
-        style={{
-          backgroundImage: "radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0)",
-          backgroundSize: "32px 32px",
-        }}
-      />
-      {/* soft violet wash */}
-      <div className="pointer-events-none fixed top-[-100px] left-[-100px] w-[500px] h-[400px] rounded-full opacity-20 blur-[120px] bg-violet-300 z-0" />
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      {/* Safe area top spacer */}
+      <div className="h-[env(safe-area-inset-top,0px)] w-full" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md"
-      >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2.5 mb-3">
-            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-md shadow-violet-200">
-              <Shield className="h-4 w-4 text-white" />
+      <div className="flex-1 flex items-center justify-center p-4">
+        {/* subtle dot grid */}
+        <div
+          className="pointer-events-none fixed inset-0 z-0 opacity-40"
+          style={{
+            backgroundImage: "radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+        {/* soft violet wash */}
+        <div className="pointer-events-none fixed top-[-100px] left-[-100px] w-[500px] h-[400px] rounded-full opacity-20 blur-[120px] bg-violet-300 z-0" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative z-10 w-full max-w-md"
+        >
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2.5 mb-3">
+              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-md shadow-violet-200">
+                <Shield className="h-4 w-4 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">BillGuard</h1>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">BillGuard</h1>
+            <p className="text-slate-500 text-sm">Fraud Detection & Bill Management</p>
           </div>
-          <p className="text-slate-500 text-sm">Fraud Detection & Bill Management</p>
-        </div>
 
-        <Card className="border border-slate-200 shadow-xl shadow-slate-200/60 bg-white">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg text-slate-900">Sign in to your account</CardTitle>
-            <CardDescription className="text-slate-500">Select your role and enter credentials</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Role selector */}
-            <div className="grid grid-cols-3 gap-2 mb-6">
-              {roles.map((r) => (
-                <button
-                  key={r.value}
-                  type="button"
-                  onClick={() => setSelectedRole(r.value)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-xs font-medium transition-all ${
-                    selectedRole === r.value
-                      ? "border-violet-500 bg-violet-50 text-violet-600"
-                      : "border-slate-200 text-slate-500 hover:border-violet-300 hover:text-slate-700"
-                  }`}
+          <Card className="border border-slate-200 shadow-xl shadow-slate-200/60 bg-white">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg text-slate-900">Sign in to your account</CardTitle>
+              <CardDescription className="text-slate-500">Select your role and enter credentials</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Role selector */}
+              <div className="grid grid-cols-3 gap-2 mb-6">
+                {roles.map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setSelectedRole(r.value)}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-xs font-medium transition-all ${
+                      selectedRole === r.value
+                        ? "border-violet-500 bg-violet-50 text-violet-600"
+                        : "border-slate-200 text-slate-500 hover:border-violet-300 hover:text-slate-700"
+                    }`}
+                  >
+                    <r.icon className="h-5 w-5" />
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-slate-700">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border-slate-200 focus:border-violet-400 focus:ring-violet-400/20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-slate-700">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="border-slate-200 focus:border-violet-400 focus:ring-violet-400/20"
+                  />
+                </div>
+
+                {error && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200"
+                  disabled={loading}
                 >
-                  <r.icon className="h-5 w-5" />
-                  {r.label}
-                </button>
-              ))}
-            </div>
+                  {loading
+                    ? "Signing in..."
+                    : `Sign In as ${roles.find((r) => r.value === selectedRole)?.label}`}
+                </Button>
+              </form>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-700">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="border-slate-200 focus:border-violet-400 focus:ring-violet-400/20"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-700">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="border-slate-200 focus:border-violet-400 focus:ring-violet-400/20"
-                />
-              </div>
+              <p className="text-sm text-center mt-4 text-slate-500">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-violet-600 font-medium hover:underline">
+                  Create one
+                </Link>
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
 
-              {error && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
-                  {error}
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200"
-                disabled={loading}
-              >
-                {loading
-                  ? "Signing in..."
-                  : `Sign In as ${roles.find((r) => r.value === selectedRole)?.label}`}
-              </Button>
-            </form>
-
-            <p className="text-sm text-center mt-4 text-slate-500">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-violet-600 font-medium hover:underline">
-                Create one
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {/* Safe area bottom spacer */}
+      <div className="h-[env(safe-area-inset-bottom,0px)] w-full" />
     </div>
   );
 }

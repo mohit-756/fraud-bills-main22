@@ -32,7 +32,7 @@ export default function DashboardLayout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavbar onMenuToggle={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-auto safe-pb">
           <Outlet />
         </main>
       </div>
