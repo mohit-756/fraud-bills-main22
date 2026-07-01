@@ -238,6 +238,7 @@ import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FileText, Shield, Clock, CheckCircle, AlertTriangle, TrendingUp, CalendarIcon, X, Loader2, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { API_BASE_URL } from "@/config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockBills } from "@/data/mockData";
@@ -248,7 +249,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 const statusConfig = {
   pending: { label: "Pending", className: "bg-warning/10 text-warning border-warning/20" },

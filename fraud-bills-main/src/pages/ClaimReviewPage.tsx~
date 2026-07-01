@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { API_BASE_URL } from "@/config";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -64,7 +63,7 @@ interface PolicyData {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_URL = API_BASE_URL;
+const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
 
 const riskConfig: Record<string, { label: string; className: string }> = {
   "High Risk":   { label: "High Risk",   className: "bg-destructive/10 text-destructive border-destructive/20" },
@@ -232,9 +231,7 @@ export default function ClaimReviewPage() {
   const { uploadId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-
-  // ✅ Persistent claim state (recovered on refresh/reopen)
-  const [claim, setClaim] = useState<ClaimForReview | undefined>(location.state?.claim);
+  const claim = location.state?.claim as ClaimForReview | undefined;
 
   const { toast } = useToast();
   const [step, setStep] = useState(0);
@@ -334,9 +331,9 @@ const [dueDate, setDueDate] = useState("");
     return Promise.allSettled([imgPromise, ocrPromise]);
   };
 
-  // Reset everything when a new claim is loaded
+  // Reset everything when modal opens with a new claim
   useEffect(() => {
-    if (!claim) return;
+    if (!open || !claim) return;
 
     // Full reset
     setStep(0); setComment("");
@@ -392,16 +389,12 @@ const [dueDate, setDueDate] = useState("");
       .catch((e) => setFileListError(e.message))
       .finally(() => setFileListLoading(false));
 
-  }, [claim?.upload_id]);
+  }, [open, claim?.upload_id]);
 
-  // Cleanup blob URL on unmount
+  // Cleanup blob URL on close
   useEffect(() => {
-    return () => {
-      if (imgUrl) {
-        URL.revokeObjectURL(imgUrl);
-      }
-    };
-  }, [imgUrl]);
+    if (!open && imgUrl) { URL.revokeObjectURL(imgUrl); setImgUrl(null); }
+  }, [open]);
 
   // ── File pagination handler ───────────────────────────────────────────────
 
@@ -580,59 +573,7 @@ if (claim.usertype === "vendor") {
     toast({ title: "Report downloaded" });
   };
 
-  // ✅ Recover claim if missing from navigation state
-  useEffect(() => {
-    if (!claim && uploadId) {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) return;
-      const user = JSON.parse(storedUser);
-
-      const fetchClaims = async () => {
-        try {
-          if (user.usertype === "finance") {
-            const [salesRes, vendorRes] = await Promise.all([
-              fetch(`${BASE_URL}/get-all-claims?user_id=${user.user_id}&usertype=sales`),
-              fetch(`${BASE_URL}/get-all-claims?user_id=${user.user_id}&usertype=vendor`)
-            ]);
-            const salesData = await salesRes.json();
-            const vendorData = await vendorRes.json();
-            
-            const allClaims = [
-              ...(salesData.claims || []),
-              ...(vendorData.claims || [])
-            ];
-            const found = allClaims.find(c => c.upload_id === uploadId);
-            if (found) {
-              setClaim(found);
-            } else {
-              navigate("/dashboard");
-            }
-          } else {
-            const res = await fetch(`${BASE_URL}/get-all-claims?user_id=${user.user_id}&usertype=${user.usertype}`);
-            const data = await res.json();
-            const found = (data.claims || []).find((c: any) => c.upload_id === uploadId);
-            if (found) {
-              setClaim(found);
-            } else {
-              navigate("/dashboard");
-            }
-          }
-        } catch {
-          navigate("/dashboard");
-        }
-      };
-
-      fetchClaims();
-    }
-  }, [claim, uploadId, navigate]);
-
-  if (!claim) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
-      </div>
-    );
-  }
+  if (!claim) return null;
 
   const riskStatus = forensics?.report.status ?? "";
   const riskStyle = riskConfig[riskStatus] ?? { label: riskStatus, className: "bg-muted text-muted-foreground" };

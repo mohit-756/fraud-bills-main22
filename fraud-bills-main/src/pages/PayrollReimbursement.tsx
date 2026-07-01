@@ -203,9 +203,9 @@ import { cn } from "@/lib/utils";
 import { format, parseISO, setDate } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { API_BASE_URL } from "@/config";
 
-
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 const statusConfig = {
   scheduled: { label: "Scheduled", className: "bg-warning/10 text-warning border-warning/20" },

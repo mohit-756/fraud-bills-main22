@@ -396,6 +396,7 @@
 
 
 import React, { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/config'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -507,7 +508,7 @@ export default function PoliciesPage () {
       formData.append('file', file)
 
       const response = await fetch(
-        'https://d2ontk4ewdype3.cloudfront.net/import-policies',
+        `${API_BASE_URL}/import-policies`,
         {
           method: 'POST',
           body: formData
@@ -537,7 +538,7 @@ export default function PoliciesPage () {
   const handleDownloadSample = async () => {
     try {
       const response = await fetch(
-        'https://d2ontk4ewdype3.cloudfront.net/download-sample',
+        `${API_BASE_URL}/download-sample`,
         {
           headers: { accept: 'application/json' }
         }
@@ -585,7 +586,7 @@ export default function PoliciesPage () {
         throw new Error('User ID not found in localStorage')
       }
 
-      const url = `https://d2ontk4ewdype3.cloudfront.net/add-policy?finance_user_id=${financeUserId}&title=${encodeURIComponent(
+      const url = `${API_BASE_URL}/add-policy?finance_user_id=${financeUserId}&title=${encodeURIComponent(
         newTitle
       )}&category=${encodeURIComponent(
         newCategory
@@ -646,7 +647,7 @@ export default function PoliciesPage () {
       if (!userId) return
 
       const response = await fetch(
-        `https://d2ontk4ewdype3.cloudfront.net/get-policies?user_id=${userId}&applied_to=${selectedAppliesTo}`
+        `${API_BASE_URL}/get-policies?user_id=${userId}&applied_to=${selectedAppliesTo}`
       )
 
       const data = await response.json()
@@ -707,7 +708,7 @@ export default function PoliciesPage () {
         throw new Error('User ID not found')
       }
 
-      const url = `https://d2ontk4ewdype3.cloudfront.net/delete-policy?user_id=${userId}&policy_id=${id}`
+      const url = `${API_BASE_URL}/delete-policy?user_id=${userId}&policy_id=${id}`
 
       const response = await fetch(url, {
         method: 'DELETE'
@@ -822,7 +823,7 @@ export default function PoliciesPage () {
 
   return (
     <div className='space-y-6 animate-fade-in'>
-      <div className='flex items-center justify-between flex-wrap gap-4'>
+      <div className='flex flex-col gap-4'>
         <div className='flex items-center gap-3'>
           <div className='h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center'>
             <BookOpen className='h-5 w-5 text-primary' />
@@ -834,37 +835,39 @@ export default function PoliciesPage () {
             </p>
           </div>
         </div>
-        <div className='flex items-center gap-2'>
+        <div className='flex flex-col md:flex-row items-stretch md:items-center gap-2'>
           <Button
             size='sm'
-            className='gap-1.5'
+            className='gap-1.5 h-11 md:h-9 rounded-xl md:rounded-lg'
             onClick={() => setShowTypeSelector(true)}
           >
-            <Plus className='h-3 w-4' />
+            <Plus className='h-4 w-4' />
             Add Policy
           </Button>
 
-          {/* Upload Policies */}
-          <label>
-            <input
-              type='file'
-              accept='.csv'
-              className='hidden'
-              onChange={handleUploadPolicies}
-            />
-           <Button size="sm" className="gap-1.5 cursor-pointer" asChild>
-              <span>
-                <Upload className='h-3 w-4' />
-                Import Policies
-              </span>
-            </Button>
-          </label>
+          <div className="grid grid-cols-2 gap-2 w-full md:w-auto">
+            {/* Upload Policies */}
+            <label className="flex-1">
+              <input
+                type='file'
+                accept='.csv'
+                className='hidden'
+                onChange={handleUploadPolicies}
+              />
+             <Button size="sm" className="gap-1.5 cursor-pointer w-full h-11 md:h-9 rounded-xl md:rounded-lg" variant="outline" asChild>
+                <span>
+                  <Upload className='h-3.5 w-3.5' />
+                  Import
+                </span>
+              </Button>
+            </label>
 
-          {/* Download Sample */}
-          <Button size="sm" className="gap-1.5" onClick={handleDownloadSample}>
-            <Download className='h-3 w-4' />
-            Download Sample
-          </Button>
+            {/* Download Sample */}
+            <Button size="sm" variant="outline" className="gap-1.5 w-full h-11 md:h-9 rounded-xl md:rounded-lg" onClick={handleDownloadSample}>
+              <Download className='h-3.5 w-3.5' />
+              Sample
+            </Button>
+          </div>
         </div>
       </div>
 

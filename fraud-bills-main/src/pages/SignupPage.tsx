@@ -308,8 +308,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-
-const API_BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+import { API_BASE_URL } from "@/config";
+import { hapticImpactLight, hapticSuccess, hapticError } from "@/lib/haptics";
 
 const roles: { value: UserRole; label: string; icon: React.ElementType }[] = [
   { value: "sales", label: "Sales", icon: Users },
@@ -329,12 +329,22 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  if (isAuthenticated) {
-    navigate("/dashboard", { replace: true });
-    return null;
+  // ✅ Redirect to dashboard if already authenticated
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -372,8 +382,10 @@ export default function SignupPage() {
       }
 
       toast.success("Account created successfully! Please sign in.");
+      hapticSuccess();
       navigate("/login");
     } catch (err) {
+      hapticError();
       setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
@@ -426,7 +438,10 @@ export default function SignupPage() {
                   <button
                     key={r.value}
                     type="button"
-                    onClick={() => setSelectedRole(r.value)}
+                    onClick={() => {
+                      hapticImpactLight();
+                      setSelectedRole(r.value);
+                    }}
                     className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-xs font-medium transition-all ${
                       selectedRole === r.value
                         ? "border-violet-500 bg-violet-50 text-violet-600"
@@ -439,7 +454,7 @@ export default function SignupPage() {
                 ))}
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={(e) => { hapticImpactLight(); handleSubmit(e); }} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-slate-700">Full Name</Label>
                   <Input

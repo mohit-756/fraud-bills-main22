@@ -165,6 +165,7 @@
 
  
 import React, { useState, useRef, useEffect } from "react";
+import { API_BASE_URL } from "@/config";
  
 interface Message {
   role: "user" | "assistant";
@@ -179,7 +180,7 @@ export default function Chatbot() {
  
   const bottomRef = useRef<HTMLDivElement | null>(null);
  
-  const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+  const BASE_URL = API_BASE_URL;
  
   // ✅ Get user_id from localStorage
   const getUserId = () => {

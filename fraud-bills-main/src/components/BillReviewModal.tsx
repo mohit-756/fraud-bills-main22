@@ -945,6 +945,7 @@
 
 
 import React, { useState, useEffect, useRef } from "react";
+import { API_BASE_URL } from "@/config";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -1007,7 +1008,7 @@ interface PolicyData {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 const riskConfig: Record<string, { label: string; className: string }> = {
   "High Risk":   { label: "High Risk",   className: "bg-destructive/10 text-destructive border-destructive/20" },

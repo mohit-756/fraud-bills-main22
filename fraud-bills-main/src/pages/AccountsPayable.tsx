@@ -151,8 +151,9 @@ import { Search, Wallet, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE_URL } from "@/config";
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 interface APEntry {
   ap_id:           string;

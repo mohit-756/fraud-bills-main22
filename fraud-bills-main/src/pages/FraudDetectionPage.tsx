@@ -1289,9 +1289,11 @@ interface Claim {
   amount: string; date: string; status: "pending" | "approved" | "rejected"; title: string;
 }
 
+import { API_BASE_URL } from "@/config";
+
 interface StoredUser { user_id: string; name: string; email: string; usertype: string; }
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending:  { label: "Pending",  className: "bg-warning/10 text-warning border-warning/20" },
@@ -1371,7 +1373,10 @@ export default function FraudDetectionPage() {
 
   const filtered = useMemo(() => {
     return claims.filter((c) => {
-      const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase()) || c.submitter_name.toLowerCase().includes(search.toLowerCase()) || c.upload_id.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = 
+        (c.title || "").toLowerCase().includes(search.toLowerCase()) || 
+        (c.submitter_name || "").toLowerCase().includes(search.toLowerCase()) || 
+        (c.upload_id || "").toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === "all" || c.status === statusFilter;
       let matchesDate = true;
       if (fromDate || toDate) {
@@ -1391,112 +1396,182 @@ export default function FraudDetectionPage() {
 };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-10">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Sales Bills</h1>
         <p className="text-muted-foreground text-sm">Review, approve, or reject sales submitted bills</p>
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+        <div className="relative flex-1">
           <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search by bill name, submitted by..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input placeholder="Search..." className="pl-9 h-11 md:h-9 rounded-xl md:rounded-lg" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={cn("text-xs gap-1.5", !fromDate && "text-muted-foreground")}>
-              <CalendarIcon className="h-3.5 w-3.5" /> {fromDate ? format(fromDate, "dd MMM yyyy") : "Start date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus className="p-3 pointer-events-auto" />
-          </PopoverContent>
-        </Popover>
-        <span className="text-xs text-muted-foreground">to</span>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={cn("text-xs gap-1.5", !toDate && "text-muted-foreground")}>
-              <CalendarIcon className="h-3.5 w-3.5" /> {toDate ? format(toDate, "dd MMM yyyy") : "End date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus className="p-3 pointer-events-auto" />
-          </PopoverContent>
-        </Popover>
-        {(fromDate || toDate) && (
-          <Button variant="ghost" size="sm" onClick={clearDateFilters} className="text-xs gap-1"><X className="h-3.5 w-3.5" /> Clear</Button>
-        )}
-        <Button variant="ghost" size="sm" onClick={fetchClaims} disabled={loading} className="text-xs gap-1 ml-auto">
+        <div className="flex gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="flex-1 md:w-[140px] h-11 md:h-9 rounded-xl md:rounded-lg"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("text-xs gap-1.5 h-11 md:h-9 rounded-xl md:rounded-lg whitespace-nowrap px-4", !fromDate && "text-muted-foreground")}>
+                <CalendarIcon className="h-3.5 w-3.5" /> {fromDate ? format(fromDate, "dd MMM") : "Start"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+          <span className="text-xs text-muted-foreground">to</span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("text-xs gap-1.5 h-11 sm:h-9 rounded-xl sm:rounded-lg whitespace-nowrap px-4", !toDate && "text-muted-foreground")}>
+                <CalendarIcon className="h-3.5 w-3.5" /> {toDate ? format(toDate, "dd MMM") : "End"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+          {(fromDate || toDate) && (
+            <Button variant="ghost" size="sm" onClick={clearDateFilters} className="text-xs gap-1 h-11 sm:h-9"><X className="h-3.5 w-3.5" /> Clear</Button>
+          )}
+        </div>
+
+        <Button variant="ghost" size="sm" onClick={() => { hapticImpactLight(); fetchClaims(); }} disabled={loading} className="text-xs gap-1 h-11 sm:h-9 sm:ml-auto">
           <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /> Refresh
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          {fetchError && (
-            <div className="flex items-center gap-2 text-destructive text-sm mb-4 p-3 bg-destructive/10 rounded-md">
-              <AlertCircle className="h-4 w-4 shrink-0" /> {fetchError}
+      <div>
+        {fetchError && (
+          <div className="flex items-center gap-2 text-destructive text-sm mb-4 p-4 bg-destructive/5 rounded-2xl border border-destructive/10">
+            <AlertCircle className="h-4 w-4 shrink-0" /> {fetchError}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="space-y-3 py-4">{[...Array(5)].map((_, i) => <div key={i} className="h-20 bg-muted animate-pulse rounded-2xl" />)}</div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-muted-foreground">
+                          <th className="text-left py-2 font-medium">Bill Name</th>
+                          <th className="text-left py-2 font-medium">Submitted By</th>
+                          <th className="text-right py-2 pr-6 font-medium">Amount</th>
+                          <th className="text-left py-2 pl-6 font-medium">Date</th>
+                          <th className="text-left py-2 font-medium">Status</th>
+                          <th className="text-left py-2 font-medium">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.length === 0
+                          ? <tr><td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">No claims found matching your filters.</td></tr>
+                          : filtered.map((claim) => (
+                            <tr key={claim.upload_id} className="border-b hover:bg-muted/50 transition-colors">
+                              <td className="py-3 font-medium">{claim.title}</td>
+                              <td className="py-3">{claim.submitter_name}</td>
+                              <td className="py-3 text-right pr-6 font-mono">₹{Number(claim.amount).toLocaleString("en-IN")}</td>
+                              <td className="py-3 pl-6 text-muted-foreground">{format(parseISO(claim.date), "dd MMM yyyy")}</td>
+                              <td className="py-3">
+                                <Badge variant="outline" className={statusConfig[claim.status]?.className}>
+                                  {statusConfig[claim.status]?.label ?? claim.status}
+                                </Badge>
+                              </td>
+                              <td className="py-3">
+                                <div className="flex items-center gap-1.5">
+                                  {claim.status === "pending"
+                                    ? <Button variant="outline" size="sm" className="text-xs h-7 px-3" onClick={() => handleReviewClick(claim)}>Review</Button>
+                                    : <span className="text-xs text-muted-foreground">—</span>
+                                  }
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          )}
-          {loading && (
-            <div className="space-y-3 py-4">{[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-muted animate-pulse rounded-md" />)}</div>
-          )}
-          {!loading && !fetchError && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="text-left py-2 font-medium">Bill Name</th>
-                    <th className="text-left py-2 font-medium">Submitted By</th>
-                    <th className="text-right py-2 pr-6 font-medium">Amount</th>
-                    <th className="text-left py-2 pl-6 font-medium">Date</th>
-                    <th className="text-left py-2 font-medium">Status</th>
-                    <th className="text-left py-2 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0
-                    ? <tr><td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">No claims found matching your filters.</td></tr>
-                    : filtered.map((claim) => (
-                      <tr key={claim.upload_id} className="border-b hover:bg-muted/50">
-                        <td className="py-3 font-medium">{claim.title}</td>
-                        <td className="py-3">{claim.submitter_name}</td>
-                        <td className="py-3 text-right pr-6 font-mono">₹{Number(claim.amount).toLocaleString("en-IN")}</td>
-                        <td className="py-3 pl-6 text-muted-foreground">{format(parseISO(claim.date), "dd MMM yyyy")}</td>
-                        <td className="py-3">
-                          <Badge variant="outline" className={statusConfig[claim.status]?.className}>
-                            {statusConfig[claim.status]?.label ?? claim.status}
-                          </Badge>
-                        </td>
-                        <td className="py-3">
-                          <div className="flex items-center gap-1.5">
-                            {/* <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="View claim document" onClick={() => setViewClaim(claim)}>
-                              <Eye className="h-4 w-4 text-muted-foreground" />
-                            </Button> */}
-                            {claim.status === "pending"
-                              ? <Button variant="outline" size="sm" className="text-xs" onClick={() => handleReviewClick(claim)}>Review</Button>
-                              : <span className="text-xs text-muted-foreground">—</span>
-                            }
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3">
+              {filtered.map((claim) => (
+                <Card key={claim.upload_id} className="overflow-hidden border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="min-w-0 pr-2">
+                        <p className="text-xs font-mono text-muted-foreground mb-0.5">
+                          #{claim.upload_id.slice(-8).toUpperCase()}
+                        </p>
+                        <h3 className="font-bold text-slate-900 truncate">{claim.title}</h3>
+                        <p className="text-[10px] font-medium text-slate-500 uppercase tracking-tight mt-0.5">
+                          By {claim.submitter_name}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={cn("text-[10px] font-bold uppercase tracking-tight shrink-0", statusConfig[claim.status]?.className)}
+                      >
+                        {statusConfig[claim.status]?.label ?? claim.status}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-end justify-between pt-3 border-t border-slate-50">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-0.5">
+                          {format(parseISO(claim.date), "dd MMM yyyy")}
+                        </p>
+                        <p className="text-lg font-black text-slate-900">
+                          ₹{Number(claim.amount).toLocaleString("en-IN")}
+                        </p>
+                      </div>
+
+                      {claim.status === "pending" ? (
+                        <Button
+                          size="sm"
+                          className="h-10 px-6 rounded-xl font-bold shadow-md shadow-primary/10"
+                          onClick={() => handleReviewClick(claim)}
+                        >
+                          Review
+                        </Button>
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center">
+                          <CheckCircle2 className={cn("h-5 w-5", claim.status === 'approved' ? "text-success" : "text-destructive")} />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {filtered.length === 0 && !loading && (
+                <div className="py-20 text-center bg-white border rounded-2xl">
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                    No claims found
+                  </p>
+                </div>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </>
+        )}
+      </div>
 
       <ClaimImageModal open={!!viewClaim} onClose={() => setViewClaim(null)} claim={viewClaim} />
       {/* <BillReviewModal claim={reviewClaim} open={reviewOpen} onClose={() => { setReviewOpen(false); setReviewClaim(undefined); }} onStatusUpdated={fetchClaims} /> */}

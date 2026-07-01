@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { hapticImpactLight, hapticSuccess, hapticError } from "@/lib/haptics";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -24,8 +25,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { API_BASE_URL as CONFIG_API_BASE_URL } from "@/config";
 
-const API_BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const API_BASE_URL = CONFIG_API_BASE_URL;
 
 type NotificationItem = {
   is_read?: boolean;
@@ -123,12 +125,14 @@ export default function TopNavbar({ onMenuToggle }: { onMenuToggle?: () => void 
   };
 
   const handleBellClick = async () => {
+    hapticImpactLight();
     await fetchNotifications();
     await markAllAsRead();
     navigate("/notifications");
   };
 
   const handleAutoApprovalToggle = async (enabled: boolean) => {
+    hapticImpactLight();
     if (!user || isAutoApprovalSaving) return;
     const prev = autoApprovalEnabled;
     setAutoApprovalEnabled(enabled);
@@ -200,7 +204,7 @@ export default function TopNavbar({ onMenuToggle }: { onMenuToggle?: () => void 
             </div>
           )}
 
-          <div className="flex items-center border-l border-slate-100 ml-1 pl-4">
+          <div className="flex items-center">
             <button
               className="relative p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
               onClick={handleBellClick}
@@ -213,39 +217,6 @@ export default function TopNavbar({ onMenuToggle }: { onMenuToggle?: () => void 
               )}
             </button>
           </div>
-
-          {/* User Account Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-3 p-1 pl-3 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all outline-none group">
-                <div className="flex flex-col items-end hidden md:flex">
-                  <p className="text-xs font-bold text-slate-900 leading-none">{user.name}</p>
-                  <span className="text-[10px] font-medium text-slate-400 mt-1">{roleLabel}</span>
-                </div>
-                <div className="relative">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white shadow-lg shadow-indigo-100 transition-transform group-active:scale-95">
-                    {user.name.charAt(0)}
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-                </div>
-                <ChevronDown className="h-4 w-4 text-slate-300 mr-1 hidden md:block group-hover:text-indigo-500 transition-colors" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60 p-2 rounded-2xl shadow-2xl border-slate-100 mt-2">
-              <DropdownMenuLabel className="px-2 py-2 mb-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account ID</p>
-                <p className="text-xs font-mono font-medium text-slate-600">ID: {user.id}</p>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-slate-50" />
-              <DropdownMenuItem
-                className="rounded-lg cursor-pointer gap-3 text-rose-600 focus:bg-rose-50 focus:text-rose-600 py-2.5 font-bold"
-                onClick={() => logout?.()}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </header>

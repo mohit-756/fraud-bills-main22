@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Search, Plus, Trash2, Pencil, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE_URL } from "@/config";
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 function getFinanceUserId(): string {
   try {
@@ -62,8 +63,8 @@ export default function CreatePurchaseOrderModal({ open, onClose, vendors = [] }
   // ── Vendor helpers ────────────────────────────────────────────────────────
   const filteredVendors = vendors.filter(
     (v) =>
-      v.vendor_name.toLowerCase().includes(vendorSearch.toLowerCase()) ||
-      v.email.toLowerCase().includes(vendorSearch.toLowerCase())
+      (v.vendor_name || "").toLowerCase().includes(vendorSearch.toLowerCase()) ||
+      (v.email || "").toLowerCase().includes(vendorSearch.toLowerCase())
   );
   const selectedVendor = vendors.find((v) => v.vendor_id === vendorId);
 

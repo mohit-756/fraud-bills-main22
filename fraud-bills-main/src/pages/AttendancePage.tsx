@@ -140,6 +140,7 @@
 
  
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -156,7 +157,7 @@ export default function AttendancePage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
  
-  const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+  const BASE_URL = API_BASE_URL;
  
   // ✅ GET USER ID FROM LOCAL STORAGE
   const getUserId = () => {

@@ -188,6 +188,7 @@
 
 
 import React, { useState, useEffect, useCallback } from "react";
+import { API_BASE_URL } from "@/config";
 import { motion } from "framer-motion";
 import {
   FileText,
@@ -372,7 +373,7 @@ export default function SalesDashboard() {
     try {
       const params = new URLSearchParams({ user_id: storedUser.user_id });
       const response = await fetch(
-        `https://d2ontk4ewdype3.cloudfront.net/get-dashboard?${params.toString()}`,
+        `${API_BASE_URL}/get-dashboard?${params.toString()}`,
         {
           method: "GET",
           headers: { accept: "application/json" },

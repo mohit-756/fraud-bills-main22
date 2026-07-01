@@ -618,6 +618,7 @@
  
 
 import React, { useState, useEffect, useMemo } from "react";
+import { API_BASE_URL } from "@/config";
 import { useNavigate } from "react-router-dom";
 import {
   Upload,
@@ -703,8 +704,8 @@ const SOURCE_TABS: { id: SourceType; label: string; icon: React.ElementType; des
   { id: "onelake", label: "OneLake", icon: Layers, description: "MS Fabric OneLake" },
 ];
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
-const VALIDATE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
+const VALIDATE_URL = API_BASE_URL;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 

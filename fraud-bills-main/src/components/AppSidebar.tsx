@@ -137,6 +137,7 @@ import {
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { hapticImpactLight } from "@/lib/haptics";
 
 
 interface NavItem {
@@ -206,6 +207,7 @@ export default function AppSidebar({ collapsed, onToggle, isMobile }: AppSidebar
               key={item.to}
               to={item.to}
               onClick={() => {
+                hapticImpactLight();
                 if (isMobile && onToggle) {
                   onToggle();
                 }
@@ -225,22 +227,35 @@ export default function AppSidebar({ collapsed, onToggle, isMobile }: AppSidebar
       </nav>
 
       {/* User + Logout */}
-      <div className="border-t border-sidebar-border p-3">
-        {!collapsed && (
-          <div className="mb-2 px-1">
-            <p className="text-xs font-medium text-sidebar-primary truncate">{user.name}</p>
-            <p className="text-xs text-sidebar-muted capitalize">{user.role || (user as any).usertype}</p>
+      <div className="border-t border-sidebar-border p-3 space-y-3">
+        <div className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-xl transition-all",
+          collapsed ? "justify-center" : ""
+        )}>
+          <div className="relative shrink-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sidebar-accent text-sm font-black text-sidebar-accent-foreground shadow-lg shadow-black/20">
+              {user.name.charAt(0)}
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-[#0B1F3A] shadow-sm" />
           </div>
-        )}
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-sidebar-primary truncate leading-none mb-1">{user.name}</p>
+              <p className="text-[10px] text-sidebar-muted capitalize truncate font-medium">{user.role || (user as any).usertype}</p>
+            </div>
+          )}
+        </div>
+
         <button
           onClick={() => {
+            hapticImpactLight();
             logout();
             navigate("/");
             if (isMobile && onToggle) {
               onToggle();
             }
           }}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground w-full transition-colors"
+          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:bg-rose-500/10 hover:text-rose-400 w-full transition-colors font-medium"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}

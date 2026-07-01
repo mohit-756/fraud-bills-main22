@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { API_BASE_URL } from "@/config";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,7 @@ type SortConfig = {
   direction: "asc" | "desc";
 };
 
-const API_BASE = "https://d2ontk4ewdype3.cloudfront.net";
+const API_BASE = API_BASE_URL;
 
 const getApiEndpoint = (usertype: string, userId: string): string => {
   switch (usertype) {
@@ -86,9 +87,9 @@ export default function BillsPage() {
     let filtered = bills.filter((bill) => {
       const searchStr = searchQuery.toLowerCase();
       return (
-        bill.title.toLowerCase().includes(searchStr) ||
-        bill.upload_id.toLowerCase().includes(searchStr) ||
-        bill.description.toLowerCase().includes(searchStr)
+        (bill.title || "").toLowerCase().includes(searchStr) ||
+        (bill.upload_id || "").toLowerCase().includes(searchStr) ||
+        (bill.description || "").toLowerCase().includes(searchStr)
       );
     });
 
@@ -132,8 +133,8 @@ export default function BillsPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 animate-fade-in pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Receipt className="h-5 w-5 text-primary" />
@@ -144,69 +145,124 @@ export default function BillsPage() {
           </div>
         </div>
 
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search bills..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-11 sm:h-9 text-sm rounded-xl sm:rounded-lg"
+            className="pl-9 h-11 md:h-9 text-sm rounded-xl md:rounded-lg"
           />
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          {loading ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">Loading bills...</p>
-          ) : error ? (
-            <p className="text-sm text-destructive py-6 text-center">{error}</p>
-          ) : processedBills.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">No bills found.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="text-left py-2 font-medium cursor-pointer" onClick={() => requestSort("upload_id")}>
-                      <div className="flex items-center">Tracking ID {getSortIcon("upload_id")}</div>
-                    </th>
-                    <th className="text-left py-2 font-medium cursor-pointer" onClick={() => requestSort("title")}>
-                      <div className="flex items-center">Bill Name {getSortIcon("title")}</div>
-                    </th>
-                    <th className="text-left py-2 font-medium">Description</th>
-                    <th className="text-right py-2 pr-6 font-medium cursor-pointer" onClick={() => requestSort("amount")}>
-                      <div className="flex items-center justify-end">Amount {getSortIcon("amount")}</div>
-                    </th>
-                    <th className="text-left py-2 pl-6 font-medium cursor-pointer" onClick={() => requestSort("created_at")}>
-                      <div className="flex items-center">Date {getSortIcon("created_at")}</div>
-                    </th>
-                    <th className="text-left py-2 font-medium cursor-pointer" onClick={() => requestSort("status")}>
-                      <div className="flex items-center">Status {getSortIcon("status")}</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {processedBills.map((bill) => (
-                    <tr key={bill.upload_id} className="border-b last:border-0 hover:bg-muted/50">
-                      <td className="py-3 font-medium">{bill.upload_id}</td>
-                      <td className="py-3">{bill.title}</td>
-                      <td className="py-3 text-muted-foreground">{bill.description}</td>
-                      <td className="py-3 text-right pr-6 font-mono">₹{Number(bill.amount).toLocaleString("en-IN")}</td>
-                      <td className="py-3 pl-6 text-muted-foreground">{formatDate(bill.created_at)}</td>
-                      <td className="py-3">
-                        <Badge variant="outline" className={statusConfig[bill.status]?.className}>
-                          {statusConfig[bill.status]?.label ?? bill.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div>
+        {loading ? (
+          <p className="text-sm text-muted-foreground py-12 text-center">Loading bills...</p>
+        ) : error ? (
+          <p className="text-sm text-destructive py-12 text-center">{error}</p>
+        ) : processedBills.length === 0 ? (
+          <div className="py-20 text-center bg-white border rounded-2xl">
+            <Receipt className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+              No bills found
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-muted-foreground">
+                          <th className="text-left py-2 font-medium cursor-pointer" onClick={() => requestSort("upload_id")}>
+                            <div className="flex items-center">Tracking ID {getSortIcon("upload_id")}</div>
+                          </th>
+                          <th className="text-left py-2 font-medium cursor-pointer" onClick={() => requestSort("title")}>
+                            <div className="flex items-center">Bill Name {getSortIcon("title")}</div>
+                          </th>
+                          <th className="text-left py-2 font-medium">Description</th>
+                          <th className="text-right py-2 pr-6 font-medium cursor-pointer" onClick={() => requestSort("amount")}>
+                            <div className="flex items-center justify-end">Amount {getSortIcon("amount")}</div>
+                          </th>
+                          <th className="text-left py-2 pl-6 font-medium cursor-pointer" onClick={() => requestSort("created_at")}>
+                            <div className="flex items-center">Date {getSortIcon("created_at")}</div>
+                          </th>
+                          <th className="text-left py-2 font-medium cursor-pointer" onClick={() => requestSort("status")}>
+                            <div className="flex items-center">Status {getSortIcon("status")}</div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {processedBills.map((bill) => (
+                          <tr key={bill.upload_id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                            <td className="py-3 font-medium">{bill.upload_id}</td>
+                            <td className="py-3">{bill.title}</td>
+                            <td className="py-3 text-muted-foreground">{bill.description}</td>
+                            <td className="py-3 text-right pr-6 font-mono">₹{Number(bill.amount).toLocaleString("en-IN")}</td>
+                            <td className="py-3 pl-6 text-muted-foreground">{formatDate(bill.created_at)}</td>
+                            <td className="py-3">
+                              <Badge variant="outline" className={cn(statusConfig[bill.status]?.className)}>
+                                {statusConfig[bill.status]?.label ?? bill.status}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3">
+              {processedBills.map((bill) => (
+                <Card key={bill.upload_id} className="overflow-hidden border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="min-w-0 pr-2">
+                        <p className="text-xs font-mono text-muted-foreground mb-0.5 truncate">
+                          #{bill.upload_id.slice(-8).toUpperCase()}
+                        </p>
+                        <h3 className="font-bold text-slate-900 truncate">{bill.title}</h3>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={cn("text-[10px] font-bold uppercase tracking-tight shrink-0", statusConfig[bill.status]?.className)}
+                      >
+                        {statusConfig[bill.status]?.label ?? bill.status}
+                      </Badge>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4 h-8">
+                      {bill.description || "No description provided."}
+                    </p>
+
+                    <div className="flex items-end justify-between pt-2 border-t border-slate-50">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-0.5">
+                          {formatDate(bill.created_at)}
+                        </p>
+                        <p className="text-lg font-black text-slate-900">
+                          ₹{Number(bill.amount).toLocaleString("en-IN")}
+                        </p>
+                      </div>
+
+                      <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center">
+                        <Receipt className="h-4 w-4 text-slate-400" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

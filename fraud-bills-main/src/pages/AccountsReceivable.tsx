@@ -545,8 +545,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { format, parseISO } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE_URL } from "@/config";
 
-const API_BASE = "https://d2ontk4ewdype3.cloudfront.net";
+const API_BASE = API_BASE_URL;
 
 interface ARItem {
   description: string;

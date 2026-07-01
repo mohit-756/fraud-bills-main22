@@ -832,6 +832,7 @@
 
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { API_BASE_URL } from "@/config";
 import { format, isAfter, isBefore, isSameDay, parseISO } from "date-fns";
 import { AlertCircle, CalendarIcon, Eye, Loader2, RefreshCw, Search, X } from "lucide-react";
 // import BillReviewModal, { type ClaimForReview } from "@/components/BillReviewModal";
@@ -862,7 +863,7 @@ interface StoredUser {
   user_id: string;
 }
 
-const BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+const BASE_URL = API_BASE_URL;
 
 const billTypeConfig: Record<Claim["usertype"], { label: string; className: string }> = {
   sales: { label: "Sales", className: "bg-primary/10 text-primary border-primary/20" },
@@ -1016,9 +1017,9 @@ export default function EscalatedBillsPage() {
   const filtered = useMemo(() => {
     return escalatedClaims.filter((claim) => {
       const matchesSearch =
-        claim.title.toLowerCase().includes(search.toLowerCase()) ||
-        claim.submitter_name.toLowerCase().includes(search.toLowerCase()) ||
-        claim.upload_id.toLowerCase().includes(search.toLowerCase());
+        (claim.title || "").toLowerCase().includes(search.toLowerCase()) ||
+        (claim.submitter_name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (claim.upload_id || "").toLowerCase().includes(search.toLowerCase());
       const matchesType = billTypeFilter === "all" || claim.usertype === billTypeFilter;
 
       let matchesDate = true;

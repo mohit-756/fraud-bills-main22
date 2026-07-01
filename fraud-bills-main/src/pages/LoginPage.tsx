@@ -284,15 +284,15 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Users, Wallet, Building2 } from "lucide-react";
+import { Shield, Users, Wallet, Building2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-
-const API_BASE_URL = "https://d2ontk4ewdype3.cloudfront.net";
+import { API_BASE_URL } from "@/config";
+import { hapticImpactLight, hapticSuccess, hapticError } from "@/lib/haptics";
 
 const roles: { value: UserRole; label: string; icon: React.ElementType }[] = [
   { value: "sales", label: "Sales", icon: Users },
@@ -301,56 +301,76 @@ const roles: { value: UserRole; label: string; icon: React.ElementType }[] = [
 ];
 
 const ROLE_DASHBOARD: Record<string, string> = {
-  sales: "/dashboard/sales",
-  finance: "/dashboard/finance",
-  vendor: "/dashboard/vendor",
+  sales: "/dashboard",
+  finance: "/dashboard",
+  vendor: "/dashboard",
 };
 
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>("sales");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  if (isAuthenticated) {
-    const storedUser = localStorage.getItem("user");
-    const usertype = storedUser ? JSON.parse(storedUser).usertype : "sales";
-    navigate(ROLE_DASHBOARD[usertype] || "/dashboard", { replace: true });
-    return null;
+  // ✅ Move redirect logic to useEffect to avoid render-phase navigation
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const finalEmail = email.trim() || `${selectedRole}@company.com`;
-    const finalName = finalEmail.split("@")[0];
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required.");
+      return;
+    }
 
     setLoading(true);
-    // Simulate a tiny 200ms transition for smooth UX
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
     try {
-      const mockUser = {
-        user_id: `demo-${selectedRole}-id`,
-        name: finalName.charAt(0).toUpperCase() + finalName.slice(1),
-        email: finalEmail,
-        usertype: selectedRole,
-      };
+      const url = `${API_BASE_URL}/login?email=${encodeURIComponent(email.trim())}&password=${encodeURIComponent(password)}`;
 
-      localStorage.setItem("access_token", "mock-token");
-      localStorage.setItem("token_type", "bearer");
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { accept: "application/json" },
+      });
 
-      login(mockUser.email, "password", selectedRole);
+      if (!response.ok) {
+        const errData = await response.json();
+        const message = Array.isArray(errData.detail)
+          ? errData.detail.map((d: any) => d.msg).join(", ")
+          : errData.detail || "Invalid email or password.";
+        setError(message);
+        return;
+      }
 
+      const data = await response.json();
+
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("token_type", data.token_type);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      login(data.user.email, password, data.user.usertype as UserRole);
+      hapticSuccess();
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError("Mock login failed.");
+      hapticError();
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -402,7 +422,10 @@ export default function LoginPage() {
                   <button
                     key={r.value}
                     type="button"
-                    onClick={() => setSelectedRole(r.value)}
+                    onClick={() => {
+                      hapticImpactLight();
+                      setSelectedRole(r.value);
+                    }}
                     className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-xs font-medium transition-all ${
                       selectedRole === r.value
                         ? "border-violet-500 bg-violet-50 text-violet-600"
@@ -415,7 +438,7 @@ export default function LoginPage() {
                 ))}
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={(e) => { hapticImpactLight(); handleSubmit(e); }} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-slate-700">Email</Label>
                   <Input
@@ -429,14 +452,27 @@ export default function LoginPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-slate-700">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="border-slate-200 focus:border-violet-400 focus:ring-violet-400/20"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pr-10 border-slate-200 focus:border-violet-400 focus:ring-violet-400/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {error && (

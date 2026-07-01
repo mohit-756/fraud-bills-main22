@@ -70,6 +70,7 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string, role: UserRole) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -79,11 +80,17 @@ function getUserFromStorage(): User | null {
   try {
     const raw = localStorage.getItem("user");
     if (!raw) return null;
-    const stored = JSON.parse(raw); // { user_id, name, email, usertype }
+    const stored = JSON.parse(raw);
+
+    // Ensure all required fields exist
+    if (!stored || !stored.user_id || !stored.usertype) {
+      return null;
+    }
+
     return {
       id: stored.user_id,
-      name: stored.name,
-      email: stored.email,
+      name: stored.name || "User",
+      email: stored.email || "",
       role: stored.usertype as UserRole,
     };
   } catch {
@@ -92,12 +99,17 @@ function getUserFromStorage(): User | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // ✅ Initialize from localStorage so refresh doesn't log the user out
-  const [user, setUser] = useState<User | null>(() => {
-  const result = getUserFromStorage();
-  console.log("AuthContext init →", result); // 🔍
-  return result;
-});
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // ✅ Initialize synchronously from storage to avoid flicker/loops
+  React.useLayoutEffect(() => {
+    const stored = getUserFromStorage();
+    if (stored) {
+      setUser(stored);
+    }
+    setIsLoading(false);
+  }, []);
 
   const login = (email: string, _password: string, role: UserRole) => {
     // localStorage is already written by LoginPage before this is called
@@ -128,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signup,
         logout,
         isAuthenticated: !!user,
+        isLoading,
       }}
     >
       {children}

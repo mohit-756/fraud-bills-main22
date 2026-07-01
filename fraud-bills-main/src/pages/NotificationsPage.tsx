@@ -160,6 +160,7 @@
 
 
 import React, { useState, useMemo, useEffect } from "react";
+import { API_BASE_URL } from "@/config";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -241,7 +242,7 @@ export default function NotificationsPage() {
       if (!userId) return;
 
       const res = await fetch(
-        `https://d2ontk4ewdype3.cloudfront.net/get-notifications?user_id=${userId}`
+        `${API_BASE_URL}/get-notifications?user_id=${userId}`
       );
 
       const data = await res.json();
@@ -328,7 +329,7 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* HEADER */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Bell className="h-5 w-5 text-primary" />
@@ -344,10 +345,10 @@ export default function NotificationsPage() {
         </div>
 
         {/* FILTERS */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Quick Filter */}
           <Select value={quickFilter} onValueChange={handleQuickFilter}>
-            <SelectTrigger className="h-8 w-[120px] text-xs">
+            <SelectTrigger className="h-11 md:h-8 w-[120px] text-xs shrink-0 rounded-xl md:rounded-lg">
               <SelectValue placeholder="Filter by" />
             </SelectTrigger>
             <SelectContent>
@@ -364,13 +365,13 @@ export default function NotificationsPage() {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "text-xs gap-1.5",
+                  "text-xs gap-1.5 h-11 md:h-8 shrink-0 rounded-xl md:rounded-lg px-4",
                   !fromDate && "text-muted-foreground"
                 )}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
                 {fromDate
-                  ? format(fromDate, "dd MMM yyyy")
+                  ? format(fromDate, "dd MMM")
                   : "Start date"}
               </Button>
             </PopoverTrigger>
@@ -383,7 +384,7 @@ export default function NotificationsPage() {
             </PopoverContent>
           </Popover>
 
-          <span className="text-xs text-muted-foreground">to</span>
+          <span className="text-xs text-muted-foreground shrink-0">to</span>
 
           {/* To Date */}
           <Popover>
@@ -392,13 +393,13 @@ export default function NotificationsPage() {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "text-xs gap-1.5",
+                  "text-xs gap-1.5 h-11 md:h-8 shrink-0 rounded-xl md:rounded-lg px-4",
                   !toDate && "text-muted-foreground"
                 )}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
                 {toDate
-                  ? format(toDate, "dd MMM yyyy")
+                  ? format(toDate, "dd MMM")
                   : "End date"}
               </Button>
             </PopoverTrigger>
@@ -416,7 +417,7 @@ export default function NotificationsPage() {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="text-xs gap-1"
+              className="text-xs gap-1 h-11 md:h-8 shrink-0 rounded-xl"
             >
               <X className="h-3.5 w-3.5" /> Clear
             </Button>
